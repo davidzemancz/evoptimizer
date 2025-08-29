@@ -20,58 +20,54 @@ def evolutionary_strategies(problem, pop_size=100, generations=300, verbose=Fals
     mu = pop_size  # Parent population size
     lambda_size = pop_size  # Offspring population size
     
-    # Vectorized initialization
+    # Populace
     population = np.random.uniform(problem.xl, problem.xu, (mu, problem.n_var))
     
-    # Initialize strategy parameters (sigma for each variable) - vectorized
+    # Optimalizacni parametry
     sigma_range = 0.1 * (problem.xu - problem.xl)
     sigma_pop = np.tile(sigma_range, (mu, 1))
     
-    # Evaluate initial population - batch if possible
+    # Predpocitam fintss
     fitness_pop = [evaluate(problem, individual) for individual in population]
     
-    # Pre-compute adaptive parameters
+    # Adaptivni parametry
     tau = 1.0 / np.sqrt(2 * np.sqrt(problem.n_var))  # Global learning rate
     tau_prime = 1.0 / np.sqrt(2 * problem.n_var)     # Local learning rate
     search_center = (problem.xl + problem.xu) / 2
     center_bias = 0.1
-    sigma_min = 1e-6 * (problem.xu - problem.xl)
+    sigma_min = 1e-5 * (problem.xu - problem.xl)
     
-    # Evolution loop
+    # Evoluce
     for g in range(generations):
-        # Vectorized parent selection
+        # Vyberu parenty
         parent_indices = np.random.randint(mu, size=lambda_size)
         parents = population[parent_indices]
         parent_sigmas = sigma_pop[parent_indices]
         
-        # Vectorized self-adaptation
+        # Self-adaptatace
         global_factors = np.exp(tau * np.random.normal(size=lambda_size))
         local_factors = np.exp(tau_prime * np.random.normal(size=(lambda_size, problem.n_var)))
         
-        # Update sigma with minimum threshold - vectorized
+        # Prepocitam sigmy
         new_sigmas = parent_sigmas * global_factors[:, np.newaxis] * local_factors
         new_sigmas = np.maximum(new_sigmas, sigma_min)
         
-        # Vectorized biased mutation
+        # Biased mutace
         bias_vectors = center_bias * (search_center - parents) / (problem.xu - problem.xl)
         mutations = np.random.normal(0, 1, (lambda_size, problem.n_var)) * new_sigmas
         offspring = parents + mutations + bias_vectors
-        
-        # Vectorized bounds clipping
+
+        # Kontrola boundu
         offspring = np.clip(offspring, problem.xl, problem.xu)
         
-        # Evaluate offspring (this is the bottleneck - can't vectorize easily)
+        # Spoctam fitness offspringu
         offspring_fitness = [evaluate(problem, individual) for individual in offspring]
         
-        # Combine populations - use numpy operations where possible
+        # Vyberu nejlepsi z populace
         combined_pop = np.vstack([population, offspring])
         combined_sigma = np.vstack([sigma_pop, new_sigmas])
         combined_fitness = fitness_pop + offspring_fitness
-        
-        # Environmental selection
         selected_indices = environmental_selection(combined_fitness, mu)
-        
-        # Update population using advanced indexing
         population = combined_pop[selected_indices]
         sigma_pop = combined_sigma[selected_indices]
         fitness_pop = [combined_fitness[i] for i in selected_indices]
