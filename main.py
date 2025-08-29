@@ -33,10 +33,8 @@ def main(problem_name, algorithm, verbose):
         population, fitness_pop = differential_evolution(problem, verbose=verbose)
     elif algorithm.lower() == 'es':
         population, fitness_pop = evolutionary_strategies(problem, verbose=verbose)
-    elif algorithm.lower() == 'esf':
-        population, fitness_pop = evolutionary_strategies_fast(problem, verbose=verbose)
     else:
-        raise ValueError(f"Unknown algorithm: {algorithm}. Available: de, es, esf")
+        raise ValueError(f"Unknown algorithm: {algorithm}. Available: de, es")
 
     # Filter out infeasible solutions for plotting
     feasible_solutions, feasible_objectives = filter_feasible_solutions(population, fitness_pop)
