@@ -31,11 +31,11 @@ def run_osy(verbose):
 
     problem = get_problem(problem_name)
     if verbose: print("Differential evolution... pop_size=100, generations=500")
-    de_pop, de_fit = differential_evolution(problem, pop_size=100, generations=500, F=0.8, CR=0.9, verbose=verbose)
+    de_pop, de_fit = differential_evolution(problem, pop_size=100, generations=100, verbose=verbose)
     if verbose: print("Evolutionary strategies... pop_size=100, generations=200")
-    es_pop, es_fit = evolutionary_strategies(problem, pop_size=100, generations=200, verbose=verbose)
+    es_pop, es_fit = evolutionary_strategies(problem, pop_size=100, generations=300, verbose=verbose)
     if verbose: print("NSGA-II... pop_size=100, generations=200")
-    nsga2_pop, nsga2_fit = nsga2(problem, pop_size=100, generations=200, verbose=verbose)
+    nsga2_pop, nsga2_fit = nsga2(problem, pop_size=100, generations=300, verbose=verbose)
 
     if verbose: print(f"---- Finished {problem_name} experiment ----")
 
@@ -74,6 +74,10 @@ def plot(problem, problem_name, de_pop, de_fit, es_pop, es_fit, nsga2_pop, nsga2
     plt.legend()
     plt.grid(True, alpha=0.3)
     plt.show()
+
+    # ulozim plot
+    plt.savefig(f"algorithm_comparison_{problem_name}.png")
+    plt.close()
 
 
 if __name__ == "__main__":
