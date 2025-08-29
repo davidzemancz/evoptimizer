@@ -1,5 +1,5 @@
 import numpy as np
-from eva_core import evaluate, print_progress, filter_feasible_solutions, clip_to_bounds
+from eva_core import evaluate, print_progress, filter_feasible_solutions, clip_to_bounds, dominates
 
 
 def nsga2(problem, pop_size=100, generations=300, verbose=False):
@@ -200,19 +200,6 @@ def crowding_distance(fitness_pop):
                 ) / obj_range
     
     return distances
-
-
-def dominates(f1, f2):
-    """
-    Check if f1 dominates f2 (Pareto dominance)
-    """
-    if f1 is None or f2 is None:
-        return False
-    
-    better_or_equal = all(f1[i] <= f2[i] for i in range(len(f1)))
-    strictly_better = any(f1[i] < f2[i] for i in range(len(f1)))
-    
-    return better_or_equal and strictly_better
 
 
 def tournament_selection(population, fitness_pop, tournament_size=2):

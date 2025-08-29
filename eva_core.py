@@ -3,8 +3,8 @@ import numpy as np
 
 def evaluate(problem, x):
     """
-    Vyhodnoti fitness funkci (vzdy minimalizuji)
-    Pokud neni feasible, vrati None
+    Evaluates the fitness of a solution, if feasible.
+    Otherwise, returns None.
     """
     # Vyhodnoceni
     F, G = problem.evaluate(x, return_values_of=["F", "G"])
@@ -78,56 +78,6 @@ def pareto_ranking(objectives):
                 ranks[i] += 1
     
     return ranks
-
-
-def environmental_selection(fitness_pop, mu):
-    """
-    Environmental selection - select best μ individuals
-    Handles multi-objective optimization with Pareto ranking
-    """
-    n = len(fitness_pop)
-    
-    # Separate feasible and infeasible solutions
-    feasible_indices = []
-    infeasible_indices = []
-    
-    for i, fit in enumerate(fitness_pop):
-        if fit is not None:
-            feasible_indices.append(i)
-        else:
-            infeasible_indices.append(i)
-    
-    selected = []
-    
-    # First, select from feasible solutions
-    if feasible_indices:
-        if len(feasible_indices) <= mu:
-            # Take all feasible solutions
-            selected.extend(feasible_indices)
-        else:
-            # Use Pareto ranking for multi-objective
-            ranks = pareto_ranking([fitness_pop[i] for i in feasible_indices])
-            
-            # Sort by rank (lower is better)
-            sorted_pairs = sorted(zip(feasible_indices, ranks), key=lambda x: x[1])
-            selected.extend([idx for idx, _ in sorted_pairs[:mu]])
-    
-    # Fill remaining slots with random infeasible solutions
-    remaining_slots = mu - len(selected)
-    if remaining_slots > 0 and infeasible_indices:
-        random_infeasible = np.random.choice(infeasible_indices, 
-                                           min(remaining_slots, len(infeasible_indices)), 
-                                           replace=False)
-        selected.extend(random_infeasible)
-    
-    # If still not enough, duplicate some selected individuals
-    while len(selected) < mu:
-        if selected:
-            selected.append(np.random.choice(selected))
-        else:
-            selected.append(0)  # Fallback
-    
-    return selected[:mu]
 
 
 def initialize_population(problem, pop_size):

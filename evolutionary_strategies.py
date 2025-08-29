@@ -1,5 +1,5 @@
 import numpy as np
-from eva_core import evaluate, dominates, print_progress, filter_feasible_solutions, environmental_selection, clip_to_bounds
+from eva_core import evaluate, dominates, print_progress, filter_feasible_solutions, clip_to_bounds, pareto_ranking
 
 
 def evolutionary_strategies(problem, pop_size=100, generations=300, verbose=False):
@@ -79,5 +79,50 @@ def evolutionary_strategies(problem, pop_size=100, generations=300, verbose=Fals
             print_progress(g + 1, mu, fitness_pop, "ES", extra_info)
 
     return population, fitness_pop
+
+
+def environmental_selection(fitness_pop, mu):
+    """
+    Environmental selection - select best μ individuals
+    Handles multi-objective optimization with Pareto ranking
+    """
+    n = len(fitness_pop)
+    
+    # Rozdelim feasible a infeasible
+    feasible_indices = []
+    infeasible_indices = []
+    
+    for i, fit in enumerate(fitness_pop):
+        if fit is not None:
+            feasible_indices.append(i)
+        else:
+            infeasible_indices.append(i)
+    
+    selected = []
+    
+    # Prve vybiram z feasible solutions
+    if feasible_indices:
+        if len(feasible_indices) <= mu:
+            # Pokud se vejdou, beru vsechny
+            selected.extend(feasible_indices)
+        else:
+            # Jinak beru podle pareto dominance
+            ranks = pareto_ranking([fitness_pop[i] for i in feasible_indices])
+            sorted_pairs = sorted(zip(feasible_indices, ranks), key=lambda x: x[1])
+            selected.extend([idx for idx, _ in sorted_pairs[:mu]])
+
+    # Zbytek doplnim nahodne infeasible
+    remaining_slots = mu - len(selected)
+    if remaining_slots > 0 and infeasible_indices:
+        random_infeasible = np.random.choice(infeasible_indices, 
+                                           min(remaining_slots, len(infeasible_indices)), 
+                                           replace=False)
+        selected.extend(random_infeasible)
+    
+    # Pokud jich porad neni dost, duplikuji
+    while len(selected) < mu:
+       selected.append(np.random.choice(selected))
+    
+    return selected[:mu]
 
 
