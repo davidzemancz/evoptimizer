@@ -85,7 +85,7 @@ def differential_evolution(problem, pop_size=100, generations=1000, F=0.8, CR=0.
         fitness_pop = new_fitness
         
         # Printim 
-        if verbose and (g + 1) % 100 == 0:
+        if verbose and (g + 1) % 50 == 0:
             # unique solutions
             unique_count = len(set(tuple(sol) for sol in population))
             extra_info = f"{unique_count}/{pop_size} unique solutions"

@@ -1,10 +1,11 @@
+from nsga2 import nsga2
 from pymoo.problems import get_problem
 from pymoo.util.plotting import plot
 import numpy as np
 import sys
 import matplotlib.pyplot as plt
 from differential_evolution import differential_evolution
-from evolutionary_strategies import evolutionary_strategies, evolutionary_strategies_fast
+from evolutionary_strategies import evolutionary_strategies
 from eva_core import filter_feasible_solutions
 
 # (https://pymoo.org/problems/multi/bnh.html)
@@ -33,6 +34,8 @@ def main(problem_name, algorithm, verbose):
         population, fitness_pop = differential_evolution(problem, verbose=verbose)
     elif algorithm.lower() == 'es':
         population, fitness_pop = evolutionary_strategies(problem, verbose=verbose)
+    elif algorithm.lower() == 'nsga2':
+        population, fitness_pop = nsga2(problem, verbose=verbose)
     else:
         raise ValueError(f"Unknown algorithm: {algorithm}. Available: de, es")
 
@@ -56,39 +59,35 @@ def plot_solutions_with_pareto_front(problem, feasible_objectives, algorithm_nam
     """
     Plot the feasible solutions along with the Pareto front
     """
-    try:
-        # Get the true Pareto front
-        pf = problem.pareto_front()
-        
-        # Create the plot
-        plt.figure(figsize=(10, 8))
-        
-        # Plot feasible solutions first (in front)
-        if len(feasible_objectives) > 0:
-            plt.scatter(feasible_objectives[:, 0], feasible_objectives[:, 1], 
-                       c='blue', alpha=0.6, s=50, zorder=5, label=f'{algorithm_name.upper()} Solutions')
-        
-        # Plot Pareto front behind (as background)
-        if pf is not None and len(pf) > 0:
-            plt.plot(pf[:, 0], pf[:, 1], 'r-', linewidth=2, label='True Pareto Front')
-            plt.scatter(pf[:, 0], pf[:, 1], c='red', s=30, zorder=3)
-        
-        plt.xlabel('Objective 1 (f1)')
-        plt.ylabel('Objective 2 (f2)')
-        plt.title(f'{algorithm_name.upper()} Solutions vs Pareto Front')
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-        
-        # Save and show plot
-        filename = f'{algorithm_name.lower()}_solutions_pareto_front.png'
-        plt.savefig(filename, dpi=300, bbox_inches='tight')
-        plt.show()
-        
-        print(f"Plot saved as '{filename}'")
-        
-    except Exception as e:
-        print(f"Error creating plot: {e}")
-        print("Plotting not available")
+  
+    # Get the true Pareto front
+    pf = problem.pareto_front()
+    
+    # Create the plot
+    plt.figure(figsize=(10, 8))
+    
+    # Plot feasible solutions first (in front)
+    if len(feasible_objectives) > 0:
+        plt.scatter(feasible_objectives[:, 0], feasible_objectives[:, 1], 
+                    c='blue', alpha=0.6, s=50, zorder=5, label=f'{algorithm_name.upper()} Solutions')
+    
+    # Plot Pareto front behind (as background)
+    if pf is not None and len(pf) > 0:
+        plt.plot(pf[:, 0], pf[:, 1], 'r-', linewidth=2, label='True Pareto Front')
+        plt.scatter(pf[:, 0], pf[:, 1], c='red', s=30, zorder=3)
+    
+    plt.xlabel('Objective 1 (f1)')
+    plt.ylabel('Objective 2 (f2)')
+    plt.title(f'{algorithm_name.upper()} Solutions vs Pareto Front')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    
+    # Save and show plot
+    filename = f'{algorithm_name.lower()}_solutions_pareto_front.png'
+    plt.show()
+    
+    # plt.savefig(filename, dpi=300, bbox_inches='tight')
+    # print(f"Plot saved as '{filename}'")
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:

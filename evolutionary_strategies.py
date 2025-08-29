@@ -73,7 +73,7 @@ def evolutionary_strategies(problem, pop_size=100, generations=300, verbose=Fals
         fitness_pop = [combined_fitness[i] for i in selected_indices]
         
         # Print progress (reduced frequency for speed)
-        if verbose and (g + 1) % 100 == 0:
+        if verbose and (g + 1) % 50 == 0:
             avg_sigma = np.mean(sigma_pop)
             extra_info = f"avg σ: {avg_sigma:.4f}"
             print_progress(g + 1, mu, fitness_pop, "ES", extra_info)
