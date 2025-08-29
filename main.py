@@ -4,7 +4,7 @@ import numpy as np
 import sys
 import matplotlib.pyplot as plt
 from differential_evolution import differential_evolution
-from evolutionary_strategies import evolutionary_strategies
+from evolutionary_strategies import evolutionary_strategies, evolutionary_strategies_fast
 from eva_core import filter_feasible_solutions
 
 # (https://pymoo.org/problems/multi/bnh.html)
@@ -15,6 +15,8 @@ from eva_core import filter_feasible_solutions
 # py .\main.py dascmop1 de true
 # py .\main.py bnh es true         (Evolutionary Strategies)
 # py .\main.py dascmop1 es true
+# py .\main.py bnh esf true        (Fast Evolutionary Strategies)
+# py .\main.py dascmop1 esf true
 
 def main(problem_name, algorithm, verbose):
     try:
@@ -31,8 +33,10 @@ def main(problem_name, algorithm, verbose):
         population, fitness_pop = differential_evolution(problem, verbose=verbose)
     elif algorithm.lower() == 'es':
         population, fitness_pop = evolutionary_strategies(problem, verbose=verbose)
+    elif algorithm.lower() == 'esf':
+        population, fitness_pop = evolutionary_strategies_fast(problem, verbose=verbose)
     else:
-        raise ValueError(f"Unknown algorithm: {algorithm}. Available: de, es")
+        raise ValueError(f"Unknown algorithm: {algorithm}. Available: de, es, esf")
 
     # Filter out infeasible solutions for plotting
     feasible_solutions, feasible_objectives = filter_feasible_solutions(population, fitness_pop)
@@ -93,7 +97,8 @@ if __name__ == "__main__":
         print("Usage: python main.py <problem_name> <algorithm> [verbose]")
         print("Example: python main.py bnh de true")
         print("         python main.py dascmop1 es true")
-        print("Available algorithms: de, es")
+        print("         python main.py bnh esf true")
+        print("Available algorithms: de, es, esf")
         sys.exit(1)
         
     problem_name = sys.argv[1]
