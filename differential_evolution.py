@@ -2,7 +2,7 @@ import numpy as np
 from eva_core import evaluate, dominates, print_progress, filter_feasible_solutions, initialize_population, clip_to_bounds
 
 
-def differential_evolution(problem, pop_size=100, generations=1000, F=0.8, CR=0.9, verbose=False):
+def differential_evolution(problem, pop_size=100, generations=500, F=0.8, CR=0.9, verbose=False):
     """
     Simple Differential Evolution algorithm
     

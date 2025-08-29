@@ -1,6 +1,5 @@
 from nsga2 import nsga2
 from pymoo.problems import get_problem
-from pymoo.util.plotting import plot
 import numpy as np
 import sys
 import matplotlib.pyplot as plt
