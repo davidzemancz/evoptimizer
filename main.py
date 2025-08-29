@@ -1,10 +1,10 @@
-from nsga2 import nsga2
+from nsga2 import nsga2, nsga2_feasible
 from pymoo.problems import get_problem
 import numpy as np
 import sys
 import matplotlib.pyplot as plt
-from differential_evolution import differential_evolution
-from evolutionary_strategies import evolutionary_strategies
+from differential_evolution import differential_evolution, differential_evolution_feasible
+from evolutionary_strategies import evolutionary_strategies, evolutionary_strategies_feasible
 from eva_core import filter_feasible_solutions
 
 # (https://pymoo.org/problems/multi/bnh.html)
@@ -30,16 +30,17 @@ def main(problem_name, algorithm, verbose):
 
     # Choose algorithm
     if algorithm.lower() == 'de':
-        population, fitness_pop = differential_evolution(problem, verbose=verbose)
+        population, fitness_pop = differential_evolution_feasible(problem, verbose=verbose)
     elif algorithm.lower() == 'es':
-        population, fitness_pop = evolutionary_strategies(problem, verbose=verbose)
+        population, fitness_pop = evolutionary_strategies_feasible(problem, verbose=verbose)
     elif algorithm.lower() == 'nsga2':
-        population, fitness_pop = nsga2(problem, verbose=verbose)
+        population, fitness_pop = nsga2_feasible(problem, verbose=verbose)
     else:
-        raise ValueError(f"Unknown algorithm: {algorithm}. Available: de, es")
+        raise ValueError(f"Unknown algorithm: {algorithm}. Available: de, es, nsga2")
 
-    # Filter out infeasible solutions for plotting
-    feasible_solutions, feasible_objectives = filter_feasible_solutions(population, fitness_pop)
+    # Algorithms now return only feasible solutions
+    feasible_solutions = population
+    feasible_objectives = fitness_pop
     
     if verbose:
         print(f"Final: {len(feasible_objectives)} feasible solutions found")

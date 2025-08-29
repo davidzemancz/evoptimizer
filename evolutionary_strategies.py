@@ -81,6 +81,24 @@ def evolutionary_strategies(problem, pop_size=100, generations=300, verbose=Fals
     return population, fitness_pop
 
 
+def evolutionary_strategies_feasible(problem, pop_size=100, generations=300, verbose=False):
+    """
+    Evolutionary Strategies that returns only feasible solutions
+    """
+    population, fitness_pop = evolutionary_strategies(problem, pop_size, generations, verbose)
+    
+    # Filter to feasible only
+    feasible_pop = []
+    feasible_fit = []
+    
+    for i, fit in enumerate(fitness_pop):
+        if fit is not None:
+            feasible_pop.append(population[i])
+            feasible_fit.append(fit)
+    
+    return np.array(feasible_pop) if feasible_pop else np.array([]), feasible_fit
+
+
 def environmental_selection(fitness_pop, mu):
     """
     Environmental selection - select best μ individuals

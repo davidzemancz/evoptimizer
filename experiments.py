@@ -1,6 +1,6 @@
-from differential_evolution import differential_evolution
-from evolutionary_strategies import evolutionary_strategies
-from nsga2 import nsga2
+from differential_evolution import  differential_evolution_feasible
+from evolutionary_strategies import evolutionary_strategies_feasible
+from nsga2 import nsga2, nsga2_feasible
 from eva_core import filter_feasible_solutions
 from pymoo.problems import get_problem
 import matplotlib.pyplot as plt
@@ -13,15 +13,15 @@ def run_bnh(verbose):
 
     problem = get_problem(problem_name)
     if verbose: print("Differential evolution... pop_size=100, generations=500")
-    de_pop, de_fit = differential_evolution(problem, pop_size=100, generations=500, verbose=verbose)
+    de_pop, de_fit = differential_evolution_feasible(problem, pop_size=100, generations=500, verbose=verbose)
     if verbose: print("Evolutionary strategies... pop_size=50, generations=100")
-    es_pop, es_fit = evolutionary_strategies(problem, pop_size=50, generations=100, verbose=verbose)
+    es_pop, es_fit = evolutionary_strategies_feasible(problem, pop_size=50, generations=100, verbose=verbose)
     if verbose: print("NSGA-II... pop_size=50, generations=100")
-    nsga2_pop, nsga2_fit = nsga2(problem, pop_size=50, generations=100, verbose=verbose)
+    nsga2_pop, nsga2_fit = nsga2_feasible(problem, pop_size=50, generations=100, verbose=verbose)
 
     if verbose: print(f"---- Finished {problem_name} experiment ----")
 
-    plot(problem, problem_name, de_pop, de_fit, es_pop, es_fit, nsga2_pop, nsga2_fit)
+    plot_pareto_front(problem, problem_name, de_fit, es_fit, nsga2_fit)
 
 
 def run_osy(verbose):
@@ -31,39 +31,39 @@ def run_osy(verbose):
 
     problem = get_problem(problem_name)
     if verbose: print("Differential evolution... pop_size=100, generations=500")
-    de_pop, de_fit = differential_evolution(problem, pop_size=100, generations=100, verbose=verbose)
+    de_pop, de_fit = differential_evolution_feasible(problem, pop_size=100, generations=100, verbose=verbose)
     if verbose: print("Evolutionary strategies... pop_size=100, generations=200")
-    es_pop, es_fit = evolutionary_strategies(problem, pop_size=100, generations=300, verbose=verbose)
+    es_pop, es_fit = evolutionary_strategies_feasible(problem, pop_size=100, generations=300, verbose=verbose)
     if verbose: print("NSGA-II... pop_size=100, generations=200")
-    nsga2_pop, nsga2_fit = nsga2(problem, pop_size=100, generations=300, verbose=verbose)
+    nsga2_pop, nsga2_fit = nsga2_feasible(problem, pop_size=100, generations=300, verbose=verbose)
 
     if verbose: print(f"---- Finished {problem_name} experiment ----")
 
-    plot(problem, problem_name, de_pop, de_fit, es_pop, es_fit, nsga2_pop, nsga2_fit)
+    plot_pareto_front(problem, problem_name, de_fit, es_fit, nsga2_fit)
 
-def run_tnk():
+def run_tnk(verbose):
     problem_name = 'tnk'
 
     if verbose: print(f"---- Running {problem_name} experiment ----")
 
     problem = get_problem(problem_name)
     if verbose: print("Differential evolution... pop_size=100, generations=500")
-    de_pop, de_fit = differential_evolution(problem, pop_size=100, generations=500, verbose=verbose)
+    de_pop, de_fit = differential_evolution_feasible(problem, pop_size=100, generations=500, verbose=verbose)
     if verbose: print("Evolutionary strategies... pop_size=50, generations=100")
-    es_pop, es_fit = evolutionary_strategies(problem, pop_size=50, generations=100, verbose=verbose)
+    es_pop, es_fit = evolutionary_strategies_feasible(problem, pop_size=50, generations=100, verbose=verbose)
     if verbose: print("NSGA-II... pop_size=50, generations=100")
-    nsga2_pop, nsga2_fit = nsga2(problem, pop_size=50, generations=100, verbose=verbose)
+    nsga2_pop, nsga2_fit = nsga2_feasible(problem, pop_size=50, generations=100, verbose=verbose)
 
     if verbose: print(f"---- Finished {problem_name} experiment ----")
 
-    plot(problem, problem_name, de_pop, de_fit, es_pop, es_fit, nsga2_pop, nsga2_fit)
+    plot_pareto_front(problem, problem_name, de_fit, es_fit, nsga2_fit)
 
-def plot(problem, problem_name, de_pop, de_fit, es_pop, es_fit, nsga2_pop, nsga2_fit):
+def plot_pareto_front(problem, problem_name,  de_fit,  es_fit,  nsga2_fit):
 
-    # Plotuji pouze feasible solutions
-    _, de_obj = filter_feasible_solutions(de_pop, de_fit)
-    _, es_obj = filter_feasible_solutions(es_pop, es_fit)
-    _, nsga2_obj = filter_feasible_solutions(nsga2_pop, nsga2_fit)
+    # Algorithms now return only feasible solutions
+    de_obj = de_fit
+    es_obj = es_fit
+    nsga2_obj = nsga2_fit
     
     # Plot
     plt.figure(figsize=(10, 8))
@@ -93,24 +93,22 @@ def plot(problem, problem_name, de_pop, de_fit, es_pop, es_fit, nsga2_pop, nsga2
     plt.show()
 
     # ulozim plot
-    plt.savefig(f"algorithm_comparison_{problem_name}.png")
-    plt.close()
+    # plt.savefig(f"algorithm_comparison_{problem_name}.png")
+    # plt.close()
 
     # Calculate and print quality metrics
-    print_quality_metrics(problem, de_obj, es_obj, nsga2_obj)
+    # print_quality_metrics(problem, de_obj, es_obj, nsga2_obj)
 
 
-def print_quality_metrics(problem, de_obj, es_obj, nsga2_obj):
+def print_quality_metrics(problem, problem_name, de_obj, es_obj, nsga2_obj):
 
     pf = problem.pareto_front()
     if pf is None:
         print("No reference Pareto front available for quality assessment")
         return
-    
-    print("\n" + "="*60)
-    print("QUALITY METRICS")
-    print("="*60)
-    
+
+    print(f"---- Quality Metrics for {problem_name} ----")
+
     algorithms = [
         ("DE", de_obj),
         ("ES", es_obj), 
@@ -118,24 +116,20 @@ def print_quality_metrics(problem, de_obj, es_obj, nsga2_obj):
     ]
     
     for alg_name, solutions in algorithms:
-        if solutions is not None and len(solutions) > 0:
-            solutions = np.array(solutions)
-            
-            # Calculate metrics
-            gd = generational_distance(solutions, pf)
-            igd = inverted_generational_distance(solutions, pf)
-            hv = hyper_volume(solutions, pf)
-            spread = diversity_spread(solutions)
-            
-            print(f"{alg_name:8} | GD: {gd:.4f} | IGD: {igd:.4f} | HV: {hv:.4f} | Spread: {spread:.4f}")
-        else:
-            print(f"{alg_name:8} | No feasible solutions found")
-    
-    print("="*60)
-    print("Lower GD/IGD = better convergence")
-    print("Higher HV = better performance")
-    print("Lower Spread = better diversity")
-    print("="*60)
+        solutions = np.array(solutions)
+        
+        # Spocitam metriky
+        gd = generational_distance(solutions, pf)
+        igd = inverted_generational_distance(solutions, pf)
+        spread = diversity_spread(solutions)
+
+        print(f"{alg_name:8} | #: {len(solutions):4} | GD: {gd:.4f} | IGD: {igd:.4f} | Spread: {spread:.4f}")
+
+
+    # print("="*60)
+    # print("Lower GD/IGD = better convergence")
+    # print("Lower Spread = better diversity")
+    # print("="*60)
 
 
 def generational_distance(solutions, pareto_front):
@@ -155,33 +149,10 @@ def inverted_generational_distance(solutions, pareto_front):
 
     min_distances = []
     for pf_point in pareto_front:
-        # Find minimum distance from Pareto front to solutions
         distances = np.sqrt(np.sum((solutions - pf_point) ** 2, axis=1))
         min_distances.append(np.min(distances))
     
     return np.mean(min_distances)
-
-
-def hyper_volume(solutions, pareto_front):
-   
-    ref_point = np.max(pareto_front, axis=0)
-   
-    # Setridim podle prvni objective
-    sorted_solutions = solutions[np.argsort(solutions[:, 0])]
-    
-    hv = 0.0
-    prev_f1 = 0.0
-    
-    for solution in sorted_solutions:
-        if solution[0] > prev_f1:  # Prekrivani
-            width = solution[0] - prev_f1
-            height = ref_point[1] - solution[1]
-            if height > 0:
-                hv += width * height
-            prev_f1 = solution[0]
-    
-    return hv
-
 
 def diversity_spread(solutions):
 
@@ -205,4 +176,4 @@ if __name__ == "__main__":
     verbose = True
     run_bnh(verbose)
     # run_osy(verbose)
-    # run_tnk()
+    # run_tnk(verbose)

@@ -72,6 +72,24 @@ def nsga2(problem, pop_size=100, generations=300, verbose=False):
     return population, fitness_pop
 
 
+def nsga2_feasible(problem, pop_size=100, generations=300, verbose=False):
+    """
+    NSGA-II that returns only feasible solutions
+    """
+    population, fitness_pop = nsga2(problem, pop_size, generations, verbose)
+    
+    # Filter to feasible only
+    feasible_pop = []
+    feasible_fit = []
+    
+    for i, fit in enumerate(fitness_pop):
+        if fit is not None:
+            feasible_pop.append(population[i])
+            feasible_fit.append(fit)
+    
+    return np.array(feasible_pop) if feasible_pop else np.array([]), feasible_fit
+
+
 def selection(fitness_pop, pop_size):
     """
     NSGA-II environmental selection using non-dominated sorting and crowding dist

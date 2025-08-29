@@ -94,4 +94,22 @@ def differential_evolution(problem, pop_size=100, generations=500, F=0.8, CR=0.9
     return population, fitness_pop
 
 
+def differential_evolution_feasible(problem, pop_size=100, generations=1000, F=0.8, CR=0.9, verbose=False):
+    """
+    Differential Evolution that returns only feasible solutions
+    """
+    population, fitness_pop = differential_evolution(problem, pop_size, generations, F, CR, verbose)
+    
+    # Filter to feasible only
+    feasible_pop = []
+    feasible_fit = []
+    
+    for i, fit in enumerate(fitness_pop):
+        if fit is not None:
+            feasible_pop.append(population[i])
+            feasible_fit.append(fit)
+    
+    return np.array(feasible_pop) if feasible_pop else np.array([]), feasible_fit
+
+
 # Remove duplicate functions - they are now in eva_core.py
