@@ -117,6 +117,7 @@ def print_quality_metrics(problem, problem_name, de_obj, es_obj, nsga2_obj):
     
     for alg_name, solutions in algorithms:
         solutions = np.array(solutions)
+        if (len(solutions) == 0): continue
         
         # Spocitam metriky
         gd = generational_distance(solutions, pf)

@@ -2,7 +2,7 @@ import numpy as np
 from eva_core import evaluate, dominates, print_progress, filter_feasible_solutions, clip_to_bounds, pareto_ranking
 
 
-def evolutionary_strategies(problem, pop_size=100, generations=300, verbose=False):
+def evolutionary_strategies(problem, pop_size=100, generations=300, sigma_range_fac=0.1, center_bias=0.1, verbose=False):
     """
     Optimized Evolutionary Strategies (μ+λ) with adaptive operators
     
@@ -24,18 +24,17 @@ def evolutionary_strategies(problem, pop_size=100, generations=300, verbose=Fals
     population = np.random.uniform(problem.xl, problem.xu, (mu, problem.n_var))
     
     # Optimalizacni parametry
-    sigma_range = 0.1 * (problem.xu - problem.xl)
+    sigma_range = sigma_range_fac * (problem.xu - problem.xl)
     sigma_pop = np.tile(sigma_range, (mu, 1))
     
     # Predpocitam fintss
     fitness_pop = [evaluate(problem, individual) for individual in population]
     
     # Adaptivni parametry
-    tau = 1.0 / np.sqrt(2 * np.sqrt(problem.n_var))  # Global learning rate
-    tau_prime = 1.0 / np.sqrt(2 * problem.n_var)     # Local learning rate
+    tau = (1.0 / np.sqrt(2 * np.sqrt(problem.n_var)))  # Global learning rate
+    tau_prime = (1.0 / np.sqrt(2 * problem.n_var))  # Local learning rate
     search_center = (problem.xl + problem.xu) / 2
-    center_bias = 0.1
-    sigma_min = 1e-5 * (problem.xu - problem.xl)
+    sigma_min = 1e-6 * (problem.xu - problem.xl)
     
     # Evoluce
     for g in range(generations):
@@ -81,11 +80,11 @@ def evolutionary_strategies(problem, pop_size=100, generations=300, verbose=Fals
     return population, fitness_pop
 
 
-def evolutionary_strategies_feasible(problem, pop_size=100, generations=300, verbose=False):
+def evolutionary_strategies_feasible(problem, pop_size=100, generations=300, sigma_range_fac=0, center_bias=0.1, verbose=False):
     """
     Evolutionary Strategies that returns only feasible solutions
     """
-    population, fitness_pop = evolutionary_strategies(problem, pop_size, generations, verbose)
+    population, fitness_pop = evolutionary_strategies(problem, pop_size, generations, sigma_range_fac, center_bias, verbose)
     
     # Filter to feasible only
     feasible_pop = []
