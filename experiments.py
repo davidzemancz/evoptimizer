@@ -68,6 +68,12 @@ def plot_pareto_front(problem, problem_name,  de_fit,  es_fit,  nsga2_fit):
     # Plot
     plt.figure(figsize=(10, 8))
     
+    # Pareto fronta
+    pf = problem.pareto_front()
+    if pf is not None:
+        plt.scatter(pf[:, 0], pf[:, 1], c='black', 
+                   s=50, label='Pareto Front', alpha=0.5)  
+
     if de_obj:
         de_obj = np.array(de_obj)
         plt.scatter(de_obj[:, 0], de_obj[:, 1], c='blue', label='DE', alpha=0.7)
@@ -79,11 +85,6 @@ def plot_pareto_front(problem, problem_name,  de_fit,  es_fit,  nsga2_fit):
     if nsga2_obj:
         nsga2_obj = np.array(nsga2_obj)
         plt.scatter(nsga2_obj[:, 0], nsga2_obj[:, 1], c='red', label='NSGA-II', alpha=0.7)
-    
-    # Pareto fronta
-    pf = problem.pareto_front()
-    if pf is not None:
-        plt.plot(pf[:, 0], pf[:, 1], 'k-', linewidth=2, label='Pareto Front')
     
     plt.xlabel('f1')
     plt.ylabel('f2')
